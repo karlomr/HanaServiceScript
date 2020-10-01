@@ -1,0 +1,13 @@
+https://www.sap-business-one-tips.com/restart-sap-hana-services-in-suse-linux/
+
+sapcontrol -nre 00 -function GetProcessList 
+
+./HDB stop
+
+./HDB start
+
+/etc/init.d/sapb1servertools restart
+
+/etc/init.d/b1s restart
+ 
+ 
