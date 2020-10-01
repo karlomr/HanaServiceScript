@@ -10,4 +10,5 @@ sapcontrol -nre 00 -function GetProcessList
 
 /etc/init.d/b1s restart
  
+ HDBSQL -U system -N HANAB1:30015 -d HDB
  
