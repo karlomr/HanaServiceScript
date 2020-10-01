@@ -12,5 +12,5 @@ cd /usr/sap/HDB/HDB00
 
 /etc/init.d/b1s restart
  
- HDBSQL -U system -N HANAB1:30015 -d HDB
+ hdbsql -u SYSTEM -N HANAB1:30015 -d HDB
  
