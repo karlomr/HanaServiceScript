@@ -16,3 +16,7 @@ cd /usr/sap/HDB/HDB00
  
  hdbsql -u SYSTEM -N HANAB1:30015 -d HDB
  
+ WebClient
+ /user/sap/SAPBusinessOne/WebClient
+ sh startup.sh restart
+ 
