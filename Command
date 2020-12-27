@@ -20,3 +20,5 @@ cd /usr/sap/HDB/HDB00
  /user/sap/SAPBusinessOne/WebClient
  sh startup.sh restart
  
+ --close service from port
+kill $(sudo lsof -t -i:7299)
