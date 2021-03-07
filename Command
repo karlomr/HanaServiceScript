@@ -1,3 +1,4 @@
+https://en.opensuse.org/SDB:Configure_openSSH
 https://www.sap-business-one-tips.com/restart-sap-hana-services-in-suse-linux/
 
 su - hdbadm
