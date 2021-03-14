@@ -27,3 +27,7 @@ kill $(sudo lsof -t -i:7299)
 
 //import database
 Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODEMOBR' with ignore existing
+
+
+//enable autostart ssh
+ sudo systemctl enable sshd
