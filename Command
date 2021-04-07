@@ -33,4 +33,7 @@ Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODE
  sudo systemctl enable sshd
  
  //change date
- date -s mm/dd/yy. Considere mm=mês, dd=dia e yy=ano. Para mudar a hora,
+ date -s mm/dd/yy. Considere mm=mês, dd=dia e yy=ano. 
+ 
+ //hana studio
+  /usr/sap/hdbstudio 
