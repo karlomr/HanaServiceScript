@@ -37,3 +37,6 @@ Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODE
  
  //hana studio
   /usr/sap/hdbstudio 
+
+//RPM instaler
+rpm -ivh file.rpm
