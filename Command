@@ -1,6 +1,11 @@
 https://www.simplified.guide/suse/enable-ssh
 https://en.opensuse.org/SDB:Configure_openSSH
+//hana session
 https://www.sap-business-one-tips.com/restart-sap-hana-services-in-suse-linux/
+https://developers.sap.com/tutorials/ui5-webcomponents-react-introduction.html
+https://developers.sap.com/tutorials/hana-clients-node.html
+https://help.sap.com/viewer/b3ee5778bc2e4a089d3299b82ec762a7/2.0.02/en-US/ddbdd66b632d4fe7b3c2e0e6e341e222.html
+https://documentation.commvault.com/commvault/v11/article?p=22335.htm
 
 su - hdbadm
 
@@ -40,3 +45,6 @@ Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODE
 
 //RPM instaler
 rpm -ivh file.rpm
+
+//hdbuserstore
+hdbuserstore -i set <key_name> <client_computer>:3NN13,<client_computer>:3NN15 <user_name> <password>
