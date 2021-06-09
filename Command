@@ -34,7 +34,7 @@ kill $(sudo lsof -t -i:7299)
 
 //import database
 Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODEMOBR' with ignore existing
-Export "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
+Export "SBODEMOBR"."*" as binary INTO '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
 
 
 //enable autostart ssh
