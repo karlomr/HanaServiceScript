@@ -4,7 +4,9 @@ https://en.opensuse.org/SDB:Configure_openSSH
 https://www.sap-business-one-tips.com/restart-sap-hana-services-in-suse-linux/
 https://developers.sap.com/tutorials/ui5-webcomponents-react-introduction.html
 https://developers.sap.com/tutorials/hana-clients-node.html
+//hdbuserstore Commands
 https://help.sap.com/viewer/b3ee5778bc2e4a089d3299b82ec762a7/2.0.02/en-US/ddbdd66b632d4fe7b3c2e0e6e341e222.html
+//Creating the SAP HANA HDBUSERSTORE Key
 https://documentation.commvault.com/commvault/v11/article?p=22335.htm
 
 su - hdbadm
@@ -32,6 +34,7 @@ kill $(sudo lsof -t -i:7299)
 
 //import database
 Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODEMOBR' with ignore existing
+Export "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
 
 
 //enable autostart ssh
