@@ -51,3 +51,5 @@ rpm -ivh file.rpm
 
 //hdbuserstore
 hdbuserstore -i set <key_name> <client_computer>:3NN13,<client_computer>:3NN15 <user_name> <password>
+
+/usr/sap/hostctrl/exe/sapcontrol -nr 00 -function GetProcessList
