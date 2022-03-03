@@ -37,6 +37,9 @@ Import "SBODEMOBR"."*" as binary from '/hana/shared/backup_service/backups/SBODE
 Export "SBODEMOBR"."*" as binary INTO '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
 
 
+//check length schema
+select SUM(DISK_SIZE/1024/1024/1024) GB  from M_TABLE_PERSISTENCE_STATISTICS where SCHEMA_NAME = 'SBODEMOBR'
+
 //enable autostart ssh
  sudo systemctl enable sshd
  
