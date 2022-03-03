@@ -44,7 +44,7 @@ select SUM(DISK_SIZE/1024/1024/1024) GB  from M_TABLE_PERSISTENCE_STATISTICS whe
  sudo systemctl enable sshd
  
  //change date
- date -s mm/dd/yy. Considere mm=mês, dd=dia e yy=ano. 
+ date -s mm/dd/yy
  
  //hana studio
   /usr/sap/hdbstudio 
