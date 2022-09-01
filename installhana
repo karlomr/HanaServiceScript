@@ -2,6 +2,8 @@
 SUSEConnect -p sle-module-development-tools/15.3/x86_64
 # Install the dependecies
 zypper update
+zypper install -ny python2
+zypper install -ny python-openssl
 zypper install -ny libgomp1
 zypper install -ny libltdl7
 zypper install -ny firewalld
