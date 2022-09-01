@@ -11,7 +11,7 @@ https://documentation.commvault.com/commvault/v11/article?p=22335.htm
 
 su - hdbadm
 
-sapcontrol -nre 00 -function GetProcessList 
+sapcontrol -nr 00 -function GetProcessList 
 
 cd /usr/sap/HDB/HDB00
 
