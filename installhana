@@ -2,31 +2,31 @@
 SUSEConnect -p sle-module-development-tools/15.3/x86_64
 # Install the dependecies
 zypper update
-zypper install -ny python2
-zypper install -ny python-openssl
-zypper install -ny libgomp1
-zypper install -ny libltdl7
-zypper install -ny firewalld
-zypper install -ny libxml2-tools
-zypper install -ny rpm-build
-zypper install -ny xmlstarlet
-zypper install -ny xorg-x11
-zypper install -ny python2
-zypper install -ny python-openssl
-zypper install -ny libcap-progs
-zypper install -ny samba
-zypper install -ny samba-client
-zypper install -ny libicu60_2
-zypper install -ny openssl
-zypper install -ny libopenssl-devel
-zypper install -ny bc
-zypper install -ny zip
-zypper install -ny glibc-i18ndata
-zypper install -ny nfs-kernel-server
-zypper install -ny libatomic1
-zypper install -ny ibopenssl-devel
-zypper install -ny perl
-zypper install -ny perl-Net-SSLeay
-zypper install -ny perl-Crypt-SSLeay
-zypper install -ny perl-IO-Tty
-zypper install -ny perl-Encode-Detect
+zypper install  python2
+zypper install  python-openssl
+zypper install  libgomp1
+zypper install  libltdl7
+zypper install  firewalld
+zypper install  libxml2-tools
+zypper install  rpm-build
+zypper install  xmlstarlet
+zypper install  xorg-x11
+zypper install  python2
+zypper install  python-openssl
+zypper install  libcap-progs
+zypper install  samba
+zypper install  samba-client
+zypper install  libicu60_2
+zypper install  openssl
+zypper install  libopenssl-devel
+zypper install  bc
+zypper install  zip
+zypper install  glibc-i18ndata
+zypper install  nfs-kernel-server
+zypper install  libatomic1
+zypper install  ibopenssl-devel
+zypper install  perl
+zypper install  perl-Net-SSLeay
+zypper install  perl-Crypt-SSLeay
+zypper install  perl-IO-Tty
+zypper install  perl-Encode-Detect
