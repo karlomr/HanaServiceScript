@@ -2,6 +2,8 @@
 SUSEConnect -p sle-module-development-tools/15.3/x86_64
 # Install the dependecies
 zypper update
+zypper install insserv-compat
+zypper install libatomic1
 zypper install  python2
 zypper install  python-openssl
 zypper install  libgomp1
