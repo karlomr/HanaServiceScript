@@ -4,4 +4,4 @@ https://help.sap.com/docs/SAP_BUSINESS_ONE_IAM/548d6202b2b6491b824a488cfc447343/
 --keyclock
 /usr/sap/SAPBusinessOne/Common/keycloak/bin
 ./add-user-keycloak.sh --user adminkeyclock --password 1234 --realm master
-systemctl restart sapb1servertools-authentication.service.
+systemctl restart sapb1servertools-authentication.service
