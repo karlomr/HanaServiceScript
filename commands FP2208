@@ -1,5 +1,6 @@
 https://help.sap.com/docs/SAP_BUSINESS_ONE_IAM/548d6202b2b6491b824a488cfc447343/d09ae6c2a0f04074907d1d2178caebeb.html
 
+ 	https://hanab1:40020/auth/realms/sapb1/broker/b1-oidc/endpoint
 
 --keyclock
 /usr/sap/SAPBusinessOne/Common/keycloak/bin
