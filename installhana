@@ -32,3 +32,4 @@ zypper install  perl-Net-SSLeay
 zypper install  perl-Crypt-SSLeay
 zypper install  perl-IO-Tty
 zypper install  perl-Encode-Detect
+zypper install --no-confirm openssh
