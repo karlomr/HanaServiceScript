@@ -17,7 +17,7 @@ SAPCAR.EXE -vxf IMDB_  -manifest SIGNATURE.SMF
 reinstall or remove service in linux
 /usr/sap/SAPBusinessOne/.setup
 
-t-PQAUk2lx9K
+
 
 
 su - hdbadm
