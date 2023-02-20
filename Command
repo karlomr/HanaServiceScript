@@ -10,6 +10,13 @@ https://help.sap.com/viewer/b3ee5778bc2e4a089d3299b82ec762a7/2.0.02/en-US/ddbdd6
 https://documentation.commvault.com/commvault/v11/article?p=22335.htm
 
 
+
+/usr/sap/HDB/HDB00/exe/sapcontrol -nr 00 -function StartSystem HDB
+/usr/sap/HDB/HDB00/exe/sapcontrol -nr 00 -function StopSystem HDB
+
+
+
+
 systemctl start sshd
 
 SAPCAR.EXE -vxf IMDB_  -manifest SIGNATURE.SMF
