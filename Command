@@ -14,8 +14,8 @@ https://documentation.commvault.com/commvault/v11/article?p=22335.htm
 /usr/sap/HDB/HDB00/exe/sapcontrol -nr 00 -function StartSystem HDB
 /usr/sap/HDB/HDB00/exe/sapcontrol -nr 00 -function StopSystem HDB
 
-CREATE DATABASE NDB USER SYSTEM 1234;
-ALTER SYSTEM START DATABASE  HDB;
+CREATE DATABASE NDB ADD 'scriptserver' SYSTEM USER  PASSWORD 1234;
+ALTER SYSTEM START DATABASE  NDB;
 select * from "SYS"."M_DATABASES"
 
 
