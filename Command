@@ -84,3 +84,15 @@ hdbuserstore -i set <key_name> <client_computer>:3NN13,<client_computer>:3NN15 <
 
 //stop services via xs
 xs sp -s COCKPIT
+
+
+[software]
+	comment = software
+	guest ok = No
+	guest only = Yes
+	path = /software
+	read only = No
+	create mask = 0777
+	directory mask = 0777
+	writeable = Yes
+	browseable = Yes
