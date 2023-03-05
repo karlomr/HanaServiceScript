@@ -2,34 +2,34 @@
 SUSEConnect -p sle-module-development-tools/15.3/x86_64
 # Install the dependecies
 zypper update
-zypper install insserv-compat
-zypper install libatomic1
-zypper install  python2
-zypper install  python-openssl
-zypper install  libgomp1
-zypper install  libltdl7
-zypper install  firewalld
-zypper install  libxml2-tools
-zypper install  rpm-build
-zypper install  xmlstarlet
-zypper install  xorg-x11
-zypper install  python2
-zypper install  python-openssl
-zypper install  libcap-progs
-zypper install  samba
-zypper install  samba-client
-zypper install  libicu60_2
-zypper install  openssl
-zypper install  libopenssl-devel
-zypper install  bc
-zypper install  zip
-zypper install  glibc-i18ndata
-zypper install  nfs-kernel-server
-zypper install  libatomic1
-zypper install  ibopenssl-devel
-zypper install  perl
-zypper install  perl-Net-SSLeay
-zypper install  perl-Crypt-SSLeay
-zypper install  perl-IO-Tty
-zypper install  perl-Encode-Detect
-zypper install --no-confirm openssh
+zypper --non-interactive install insserv-compat
+zypper --non-interactive install libatomic1
+zypper --non-interactive install  python2
+zypper --non-interactive install  python-openssl
+zypper --non-interactive install  libgomp1
+zypper --non-interactive install  libltdl7
+zypper --non-interactive install  firewalld
+zypper --non-interactive install  libxml2-tools
+zypper --non-interactive install  rpm-build
+zypper --non-interactive install  xmlstarlet
+zypper --non-interactive install  xorg-x11
+zypper --non-interactive install  python2
+zypper --non-interactive install  python-openssl
+zypper --non-interactive install  libcap-progs
+zypper --non-interactive install  samba
+zypper --non-interactive install  samba-client
+zypper --non-interactive install  libicu60_2
+zypper --non-interactive install  openssl
+zypper --non-interactive install  libopenssl-devel
+zypper --non-interactive install  bc
+zypper --non-interactive install  zip
+zypper --non-interactive install  glibc-i18ndata
+zypper --non-interactive install  nfs-kernel-server
+zypper --non-interactive install  libatomic1
+zypper --non-interactive install  ibopenssl-devel
+zypper --non-interactive install  perl
+zypper --non-interactive install  perl-Net-SSLeay
+zypper --non-interactive install  perl-Crypt-SSLeay
+zypper --non-interactive install  perl-IO-Tty
+zypper --non-interactive install  perl-Encode-Detect
+zypper --non-interactive install --no-confirm openssh
