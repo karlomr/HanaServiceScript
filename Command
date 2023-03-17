@@ -19,7 +19,7 @@ ALTER SYSTEM START DATABASE  NDB;
 select * from "SYS"."M_DATABASES"
 
 
-
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name "AllowInsecureGuestAuth" -Type DWord -Value 1
 
 
 
