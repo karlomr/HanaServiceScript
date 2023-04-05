@@ -57,7 +57,7 @@ cd /usr/sap/HDB/HDB00
 kill $(sudo lsof -t -i:7299)
 
 //import database
-IMPORT "SBODEMOBR"."*" AS BINARY FROM '/hana/shared/backup_service/backups/SBODEMOBR' WITH IGNORE EXISTING THREADS 10 RENAME SCHEMA "SBODEMOBR" TO "SBODEMOBR_";
+IMPORT "SBODEMOBR"."*" AS BINARY FROM '/hana/shared/backup_service/backups/SBODEMOBR' WITH IGNORE EXISTING THREADS 10 RENAME SCHEMA "SBODEMOBR" TO "SBODEMOBR_"; 
 Export "SBODEMOBR"."*" as binary INTO '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
 export "SBODEMOBR"."*" as binary into '/hana/shared/backup_service/backups/SBODEMOBR with no dependencies threads 20;
 
