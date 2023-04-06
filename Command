@@ -61,6 +61,8 @@ IMPORT "SBODEMOBR"."*" AS BINARY FROM '/hana/shared/backup_service/backups/SBODE
 Export "SBODEMOBR"."*" as binary INTO '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
 export "SBODEMOBR"."*" as binary into '/hana/shared/backup_service/backups/SBODEMOBR with no dependencies threads 20;
 
+cmd
+C:\Program Files\7-Zip\7z.exe a 'c:\Temp\testes_duplicado.zip' '\\hanab1\duplicados' -scc -r
 
 //check length schema
 select SUM(DISK_SIZE/1024/1024/1024) GB  from M_TABLE_PERSISTENCE_STATISTICS where SCHEMA_NAME = 'SBODEMOBR'
