@@ -1,0 +1,48 @@
+DO
+BEGIN
+    DECLARE    num_of_schema double;
+    DECLARE    header_count double;
+    DECLARE    line_count double;
+    DECLARE    initial_memory double =36;
+    DECLARE    concurrent_users int;
+    DECLARE    schema_memory double;
+    DECLARE    data_memory double;
+    DECLARE    max_memory double;
+    DECLARE    CURSOR curs1 for
+               select schema_name, table_name
+                 from public.tables
+                where SCHEMA_NAME in (select schema_name from PUBLIC.TABLES WHERE TABLE_NAME='CINF')
+                  and table_name in ('OINV','ORDR','OQUT','ODLN','OPCH','OPDN','OPOR','ORCT','OVPM','OIGE','OIGN','OWTR',
+                                     'INV1','RDR1','QUT1','DLN1','PCH1','PDN1','POR1','RCT2','VPM2','IGE1','IGN1','WTR1');
+    --LOAD tables
+    for cur_row as curs1()
+    do
+        exec 'load "'|| cur_row.SCHEMA_NAME ||'"."' || cur_row.TABLE_NAME ||'" all';
+    end for;
+    
+
+    SELECT COUNT('A') into concurrent_users FROM M_CONNECTIONS WHERE CONNECTION_ID>0 AND CURRENT_SCHEMA_NAME IN (SELECT SCHEMA_NAME FROM M_CS_TABLES WHERE TABLE_NAME='CINF');
+    SELECT COUNT(TABLE_NAME) INTO num_of_schema FROM M_CS_TABLES WHERE TABLE_NAME='CINF';
+    schema_memory = :num_of_schema * 4;
+    
+    
+    SELECT SUM(RECORD_COUNT) INTO header_count FROM M_CS_TABLES WHERE TABLE_NAME IN ('OINV','ORDR','OQUT','ODLN','OPCH','OPDN','OPOR','ORCT','OVPM','OIGE','OIGN','OWTR');
+    SELECT SUM(RECORD_COUNT) INTO line_count FROM M_CS_TABLES WHERE TABLE_NAME IN ('INV1','RDR1','QUT1','DLN1','PCH1','PDN1','POR1','RCT2','VPM2','IGE1','IGN1','WTR1');
+    data_memory = :header_count*2/300/1024 + :line_count/300/1024;
+    
+    IF :schema_memory>:data_memory
+    THEN
+       max_memory=:schema_memory;
+    ELSE
+       max_memory=:data_memory;
+    END IF;
+    
+    --add round function here
+    SELECT
+        round(:max_memory + :initial_memory + :concurrent_users * 0.15 / 2, 2) AS "Required memory (GB)",
+        :num_of_schema AS "Num of Schema",
+        :header_count AS "Num of Documents (partially)",
+        round(:line_count / :header_count, 2) AS "Document Avg Lines",
+        :concurrent_users AS "Company Database Connections"
+    FROM DUMMY;
+END;
