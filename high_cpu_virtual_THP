@@ -1,0 +1,4 @@
+https://www.suse.com/c/sles-1112-os-tuning-optimisation-guide-part-1/
+
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+cat /sys/kernel/mm/transparent_hugepage/enabled
