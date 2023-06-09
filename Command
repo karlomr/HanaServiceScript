@@ -60,7 +60,7 @@ kill $(sudo lsof -t -i:7299)
 //import database
 IMPORT "SBODEMOBR"."*" AS BINARY FROM '/hana/shared/backup_service/backups/SBODEMOBR' WITH  no dependencies IGNORE EXISTING THREADS 10 RENAME SCHEMA "SBODEMOBR" TO "SBODEMOBR_"; 
 Export "SBODEMOBR"."*" as binary INTO '/hana/shared/backup_service/backups/SBODEMOBR' WITH REPLACE
-export "SBODEMOBR"."*" as binary into '/hana/shared/backup_service/backups/SBODEMOBR with compress  no dependencies threads 20;
+export "SBODEMOBR"."*" as binary into '/hana/shared/backup_service/backups/SBODEMOBR with  no dependencies threads 20;
 
 cmd
 C:\Program Files\7-Zip\7z.exe a 'c:\Temp\testes_duplicado.zip' '\\hanab1\duplicados' -scc -r
