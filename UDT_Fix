@@ -1,231 +1,253 @@
-QUERIES DE DETEÇÃO PARA SQL:
+User-defined table (UDT) and user-defined field (UDF) related issues often have different impacts. For instance, you may not be able to perform an upgrade of the database or you may receive the following error message after logging on to an SAP Business One database: "The database structure has been modified. In order to resume the process, all open windows will be closed. Do you want to continue adding the user-defined field?"
 
-A tabela definida pelo usuário está definida, mas não existe:
+This note provides a few generic queries to detect some common issues about UDTs and UDFs. If an issue is related to a UDT and UDF, the queries provided below will detect the known inconsistencies.
+
+UDT is defined but does not exist.
+UDT is not registered.
+UDF is defined on an unregistered UDT.
+UDF is defined but does not exist.
+UDF valid values are defined for a non-existing UDF.
+UDF definition does not match actuality.
+UDF/UDT contains extra spaces.
+UDF contains extra spaces in the TableID field in User-fields description in the CUFD table.
+UDF contains extra spaces in the AliasID field in User-fields description in the CUFD table.
+UDF column  with space characters in its name was found by the SAP Business One upgrade Wizard.
+UDT with space characters in its name was found by the SAP Business One upgrade Wizard.
+UDF exists but is not defined in the CUFD table.
+UDT exists with the name '@'.
+ 
+
+Solution
+In order to detect whether this issue affects your database, please run the following  queries:
+
+DETECTION QUERIES FOR SQL:
+
+UDT is defined but does not exist:
 ***
-selecione TableName de OUTB
-se não existir (
-  selecionar 1 de sysobjects onde xtype='U' e [name]='@'+TableName
+select TableName from OUTB
+where not exists (
+  select 1 from sysobjects where xtype='U' and [name]='@'+TableName
 )
 ***
 
-UDT não registrada:
+UDT is not registered:
 ***
-selecione * em sysobjects em que [name] like '@%' e name not in
-(selecione '@'+tablename de saída
-união de todos
-selecione '@'+logtable de outb onde logtable não é null) e xtype='U'
+select * from sysobjects where [name] like '@%' and name not in
+(select '@'+tablename from outb
+union all
+select '@'+logtable from outb where logtable is not null) and xtype='U'
 ***
 
-O UDF é definido em uma UDT não registrada:
+UDF is defined on an unregistered UDT:
 ***
-selecione T0.TableID de CUFD T0 onde left(T0.TableID,1)='@'  e não existe (
-selecione 1 de  OUTB T1 onde '@'+T1.TableName = T0.TableID ou '@'+T1.LogTable = T0.TableID
+select T0.TableID from CUFD T0 where left(T0.TableID,1)='@'  and not exists (
+select 1 from  OUTB T1 where '@'+T1.TableName = T0.TableID or '@'+T1.LogTable = T0.TableID
 )
 ***
 
-O UDF está definido, mas não existe:
+UDF is defined but does not exist:
 ***
-selecione TableID, AliasID de CUFD onde não existe (
-selecione t0.name, t1.name
-de sysobjects t0 inner join syscolumn t1
-em t0.xtype='U' e t0.id=t1.id
-onde t0.name=TableID e t1.name='U_'+AliasID
+select TableID, AliasID from CUFD where not exists (
+select t0.name, t1.name
+from sysobjects t0 inner join syscolumns t1
+on t0.xtype='U' and t0.id=t1.id
+where t0.name=TableID and t1.name='U_'+AliasID
 )
-e ID de tabela não está em ('BTNT', 'BTNT1', 'OIBT', 'OSRI', 'SRNT', 'SRNT1', 'ODIB', 'ODSR')
+and TableID not in ('BTNT', 'BTNT1', 'OIBT', 'OSRI', 'SRNT', 'SRNT1', 'ODIB', 'ODSR')
 ***
 
-Os valores válidos de UDF são definidos para um UDF não existente:
-selecione TableId, FieldID de UFD1 T
-se não existir (
-  selecionar 1 de CUFD onde TableId=T.TableId e FieldID=T.FieldID
+UDF valid values are defined for a non-existing UDF:
+select TableId, FieldID from UFD1 T
+where not exists (
+  select 1 from CUFD where TableId=T.TableId and FieldID=T.FieldID
 )
 ***
 
-A definição UDF não corresponde à realidade:
+UDF definition does not match actuality:
 ***
-selecione T1.UDF, T0.nvarchar_size como 'act_size', T1.nvarchar_size como 'def_size' de (
-selecione T2.name + '.' + T3.name como 'UDF', T3.length/2 como 'nvarchar_size' de sysobjects T2 inner join syscolumn T3 em T2.id=T3.id onde T2.xtype='U' e T3.xtype
-(selecione xtype de systypes onde [name]='nvarchar')
+select T1.UDF, T0.nvarchar_size as 'act_size', T1.nvarchar_size as 'def_size' from (
+select T2.name + '.' + T3.name as 'UDF', T3.length/2 as 'nvarchar_size' from sysobjects T2 inner join syscolumns T3 on T2.id=T3.id where T2.xtype='U' and T3.xtype in
+(select xtype from systypes where [name]='nvarchar')
 ) T0
 inner join (
-select tableid + '.U_' + aliasid como 'UDF', editsize como 'nvarchar_size'
-do cufd onde typeid='A' e editsize>1
+select tableid + '.U_' + aliasid as 'UDF', editsize as 'nvarchar_size'
+from cufd where typeid='A' and editsize>1
 ) T1
-em T0.UDF=T1.UDF
-onde T0.nvarchar_size>T1.nvarchar_size
+on T0.UDF=T1.UDF
+where T0.nvarchar_size>T1.nvarchar_size
 ***
 
-O UDF contém espaços adicionais:
-O UDF contém espaços adicionais no campo TableID na descrição de campos do usuário na tabela CUFD:
+UDF contains extra spaces:
+UDF contains extra spaces in the TableID field in User-fields description in the CUFD table:
 ***
-selecione * de CUFD
-onde  comprimento de dados(TableID)<>LEN(TableID)
-e  ascii(SUBSTRING (TableID, LEN(TableID)+1, 1)) =32
-***
-
-O UDF contém espaços adicionais no campo AliasID na descrição de campos do usuário na tabela CUFD:
-***
-selecione * de CUFD
-onde  datalength(AliasID)<>len(AliasID)
-e  ascii(SUBSTRING (AliasID, LEN(AliasID)+1, 1)) =32
+select * from CUFD
+where  datalength(TableID)<>LEN(TableID)
+and  ascii(SUBSTRING (TableID, LEN(TableID)+1, 1)) =32
 ***
 
-   c.  A coluna UDF com caracteres de espaço em seu nome foi encontrada pelo assistente de upgrade do SAP Business One.
+UDF contains extra spaces in the AliasID field in User-fields description in the CUFD table:
+***
+select * from CUFD
+where  datalength(AliasID)<>len(AliasID)
+and  ascii(SUBSTRING (AliasID, LEN(AliasID)+1, 1)) =32
+***
+
+   c.  UDF column  with space characters in its name was found by the SAP Business One Upgrade Wizard.
 
  ***
 
- Selecionar 'Nome da coluna UDF ''' + COLUMN_NAME + ''' contém caracteres de espaço na tabela ' + TABLE_NAME como "Resolução"
- FROM INFORMATION_SCHEMA.COLUMNS t0 inner join cufd t1 em t0.TABLE_NAME = t1.TableID e t0.COLUMN_NAME = 'U_' + t1.AliasID 
- onde t0.[COLUMN_NAME] como 'U[_]% %'
+ Select 'UDF column name ''' + COLUMN_NAME + ''' contains space characters in table ' + TABLE_NAME as "Resolution"
+ FROM INFORMATION_SCHEMA.COLUMNS t0 inner join cufd t1 on t0.TABLE_NAME = t1.TableID and t0.COLUMN_NAME = 'U_' + t1.AliasID 
+ where t0.[COLUMN_NAME] like 'U[_]% %'
 
 ***
 
-d. A tabela definida pelo usuário com caracteres de espaço em seu nome foi encontrada pelo assistente de upgrade do SAP Business One
+d. UDT with space characters in its name was found by the SAP Business One Upgrade Wizard
 
 ***
 
-Selecionar 'Nome UDT ''' + TABLE_NAME + ''' contém espaços em branco' como "Resolução"
+Select 'UDT name ''' + TABLE_NAME + ''' contains space characters' as "Resolution"
 FROM INFORMATION_SCHEMA.TABLES t0 inner join outb t1 on t0.TABLE_NAME = '@' + t1.TableName
-onde t0.[TABLE_NAME] como '@% %'
+where t0.[TABLE_NAME] like '@% %'
 
 ***
 
-Para mais informações sobre as verificações 7c e 7d, consulte a nota 2781726
+For more information on checks 7c and 7d please see note 2781726
 
-    8. O UDF existe, mas não está definido:
+    8. UDF exists but is not defined:
 
       ***
-     selecionar T1.name [Nome da tabela], T0.name [Nome da coluna] de sys.column T0 unir sys.objects T1 em T0.object_id = T1.object_id
-     join esquerdo CUFD  T2 em T2.TableID = T1.name e ('U_' + T2.AliasID) = T0.name
-     em que T1.type = 'U' e T0.name como 'U/_%' escape '/'
-     e ('U_' + T2.AliasID) é nulo
-     e (T0.name !='U_NAME' e não T1.name ('OUSR', 'AUSR', 'TDIB', 'TIBT', 'TDSR', 'TSRI','OEML'))
+     select T1.name [Table name], T0.name [Column name] from sys.columns T0 join sys.objects T1 on T0.object_id = T1.object_id
+     left join CUFD  T2 on T2.TableID = T1.name and ('U_' + T2.AliasID) = T0.name
+     where T1.type = 'U' and T0.name like 'U/_%' escape '/'
+     and ('U_' + T2.AliasID) is null
+     and (T0.name !='U_NAME' and T1.name not in ('OUSR', 'AUSR', 'TDIB', 'TIBT', 'TDSR', 'TSRI','OEML'))
      ***
 
-     9. Existe UDT com o nome '@'
+     9. UDT exists with the name '@'
 
-*** Detectar valor definido pelo usuário vinculado a uma tabela sem nome:
+*** Detect user-defined value linked to a table without a name:
 SELECT * FROM CUFD WHERE TableID = '@'
 
 
-*** Detectar tabelas sem nome em um banco de dados:
+*** Detect tables without a name in a database:
 SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '@'
 
-QUERIES DE DETEÇÃO PARA HANA:
+DETECTION QUERIES FOR HANA:
 
  
 
-1) O UDT está definido, mas não existe.
+1) UDT is defined but does not exist.
 
-selecione T0."TableName" de OUTB T0 onde não existe (selecione 1 de sys.tables T1 onde T1.schema_name = current_schema e T1.is_system_table = 'FALSE' e T1.table_name = '@' || "TableName");
+select T0."TableName" from OUTB T0 where not exists (select 1 from sys.tables T1 where T1.schema_name = current_schema and T1.is_system_table = 'FALSE' and T1.table_name = '@' || "TableName");
 
  
 
-2) UDT não registrado
+2) UDT is not registered
 
 
-selecione * de sys.tables
-em que schema_name = current_schema e is_system_table = 'FALSE' e table_name like '@%'
-e table_name não estão em
+select * from sys.tables
+where schema_name = current_schema and is_system_table = 'FALSE' and table_name like '@%'
+and table_name not in
 (
-selecione '@' || "TableName" de saída
-união de todos
-selecione '@' || "LogTable" de saída onde "LogTable" não é nulo
+select '@' || "TableName" from outb
+union all
+select '@' || "LogTable" from outb where "LogTable" is not null
 );
 
-3) O UDF é definido em um UDT não registrado.*/
+3) UDF is defined on an unregistered UDT.*/
 
-selecione T0."TableID" de CUFD T0
-onde left(T0."TableID",1)='@'
-e não existe (selecione 1 de OUTB T1 onde '@' || T1."TableName" = T0."TableID" ou '@' || T1."Tabela de log"= T0."ID tabela");
+select T0."TableID" from CUFD T0
+where left(T0."TableID",1)='@'
+and not exists (select 1 from OUTB T1 where '@' || T1."TableName" = T0."TableID" or '@' || T1."LogTable"= T0."TableID");
 
  
 
-4) O UDF está definido, mas não existe.*
+4) UDF is defined but does not exist.*
 
 
-selecione "TableID", "AliasID" de CUFD
-se não existir
+select "TableID", "AliasID" from CUFD
+where not exists
 (
-selecione 1 de sys.tables t0 inner join sys.column t1 em t0.table_oid=t1.table_oid
-onde t0.schema_name = current_schema e t0.is_system_table = 'FALSE'
-e t0.table_name="TableID" e t1.column_name='U_' || "AliasID")
-e "TableID" não em ('BTNT', 'BTNT1', 'OIBT', 'OSRI', 'SRNT', 'SRNT1', 'ODIB', 'ODSR'
+select 1 from sys.tables t0 inner join sys.columns t1 on t0.table_oid=t1.table_oid
+where t0.schema_name = current_schema and t0.is_system_table = 'FALSE'
+and t0.table_name="TableID" and t1.column_name='U_' || "AliasID")
+and "TableID" not in ('BTNT', 'BTNT1', 'OIBT', 'OSRI', 'SRNT', 'SRNT1', 'ODIB', 'ODSR'
 );
 
  
 
-5) Os valores válidos de UDF são definidos para UDF não existente.
+5) UDF valid values are defined for non-existing UDF.
 
-selecione "TableID", "FieldID" de UFD1 T
-onde não existir (selecione 1 de CUFD onde "TableID"=T."TableID" e "FieldID"=T."ID do campo");
+select "TableID", "FieldID" from UFD1 T
+where not exists (select 1 from CUFD where "TableID"=T."TableID" and "FieldID"=T."FieldID");
 
-6) A definição UDF não corresponde à atualidade.
+6) UDF definition does not match actuality.
 
-selecione T2.table_name, T3.column_name "UDF", T3.length, T0."EditSize" de sys.tables T2
-inner join sys.column T3 em t2.table_oid=t3.table_oid
-inner join cufd T0 on T0."TableID" = T2.table_name e ('U_' || T0."AliasID") = T3.column_name
-em que t2.schema_name = current_schema e T2.is_system_table = 'FALSE'
-e T3.data_type_name ='NVARCHAR'
-e T0."TypeID"='A' e T0."EditSize">1
-e T3.length>T0."EditSize" ;
+select T2.table_name, T3.column_name "UDF", T3.length, T0."EditSize" from sys.tables T2
+inner join sys.columns T3 on t2.table_oid=t3.table_oid
+inner join cufd T0 on T0."TableID" = T2.table_name and ('U_' || T0."AliasID") = T3.column_name
+where t2.schema_name = current_schema and T2.is_system_table = 'FALSE'
+and T3.data_type_name ='NVARCHAR'
+and T0."TypeID"='A' and T0."EditSize">1
+and T3.length>T0."EditSize" ;
 
-7a) O UDF contém espaços adicionais no campo TableID na tabela CUFD de descrição de campos do usuário.
+7a) UDF contains extra spaces in field TableID in User-fields description CUFD table.
 
-selecione "TableID", "AliasID", "Descr" de CUFD onde "TableID" LIKE '% %';
-
- 
-
-7b) O UDF contém espaços adicionais no campo AliasID na tabela CUFD de descrição de campos de usuário
-
-selecione "TableID", "AliasID", "Descr" de CUFD onde "AliasID" LIKE '% %';
+select "TableID", "AliasID", "Descr" from CUFD where "TableID"  LIKE '% %';
 
  
 
-7c) A coluna UDF com espaços em seu nome foi encontrada pelo assistente de upgrade do SAP Business One
+7b) UDF contains extra spaces in field AliasID in User-fields description CUFD table
 
-selecione 'Nome da coluna UDF ''' || column_name || ''' contém espaços em branco na tabela ' || table_name como "Resolução"
-FROM public.table_column t0 inner join cufd t1 on t0.table_name = t1."TableID" e t0.column_name = 'U_' || t1."AliasID"
-em que schema_name = current_schema e column_name like 'U\_% %' escape '\';
+select "TableID", "AliasID", "Descr" from CUFD where  "AliasID"  LIKE '% %';
 
  
 
-7d) UDT com caracteres de espaço em seu nome foi encontrado pelo assistente de upgrade do SAP Business One
+7c) UDF column  with space characters in its name was found by the SAP business One upgrade Wizard
+
+select 'UDF column name ''' || column_name || ''' contains space characters in table ' || table_name as "Resolution"
+FROM public.table_columns t0 inner join cufd t1 on t0.table_name = t1."TableID" and t0.column_name = 'U_' || t1."AliasID"
+where schema_name = current_schema and column_name like 'U\_% %' escape '\';
 
  
 
-selecione 'Nome UDT ''' || table_name || ''' contém espaços em branco' como "Resolução"
+7d) UDT with space characters in its name was found by the SAP business One upgrade Wizard
+
+ 
+
+select 'UDT name ''' || table_name || ''' contains space characters' as "Resolution"
 FROM public.tables t0 inner join outb t1 on t0.table_name = '@' || t1."TableName"
-em que schema_name = current_schema e table_name like '@% %';
+where schema_name = current_schema and table_name like '@% %';
 
  
 
-8) O UDF existe, mas não está registrado
+8) UDF exists but is not registered
 
-selecione T2.table_name, T1.column_name "UDF" de sys.column T1
-join sys.tables T2 em t1.table_oid=t2.table_oid
-left join CUFD T0 on T2.table_name = T0."TableID" e T1.column_name = ('U_' || T0."AliasID")
-em que t2.schema_name = current_schema e T2.is_system_table = 'FALSE'
-e T1.column_name como 'U/_%' escape '/'
-e ('U_' || T0."AliasID") é nulo
-e T2.table_name não em ('OUSR', 'AUSR', 'TDIB', 'TIBT', 'TDSR', 'TSRI','OEML');
+select T2.table_name, T1.column_name "UDF" from sys.columns T1
+join sys.tables T2 on t1.table_oid=t2.table_oid
+left join CUFD T0 on T2.table_name = T0."TableID" and T1.column_name = ('U_' || T0."AliasID")
+where t2.schema_name = current_schema and T2.is_system_table = 'FALSE'
+and T1.column_name like 'U/_%' escape '/'
+and ('U_' || T0."AliasID") is null
+and T2.table_name not in ('OUSR', 'AUSR', 'TDIB', 'TIBT', 'TDSR', 'TSRI','OEML');
 
-9) Existe UDT com o nome '@'
+9) UDT exists with the name '@'
 
-*** Detectar valor definido pelo usuário vinculado a uma tabela sem nome:
+*** Detect user-defined value linked to a table without a name:
 
 SELECT * FROM "CUFD" WHERE "TableID" = '@'
 
-*** Detectar tabelas sem nome em um banco de dados:
+*** Detect tables without a name in a database:
 
-SELECT * FROM public.tables WHERE schema_name = current_schema AND table_name = '@'
+SELECT * FROM public.tables  WHERE schema_name = current_schema AND table_name = '@'
 
-Nota para os Pontos 2 e 8: o conjunto de resultados inclui colunas criadas nas tabelas do sistema SAP Business One e nas tabelas do usuário.
-No entanto, somente as colunas criadas nas tabelas do SAP Business One devem ser consideradas, pois são potencialmente prejudiciais.
-Uma lista de tabelas de sistema do SAP Business One não está disponível, pois pode ser diferente de patch para patch.
+Note for Points 2 and 8: The result set includes columns created both on SAP Business One system tables and user tables.
+However, only columns created on SAP Business One tables should be considered, as those are potentially harmful.
+A list of SAP Business One system tables is not available as it may differ from patch to patch.
 
-Nota para o ponto 4: depois de executar a correção para o ponto 4, execute também a consulta de detecção para o ponto 5 e execute a correção relevante se a consulta detectada retornar algum resultado.
+Note for Point 4: After running the fix for Point 4, please run the detect query for Point 5 also and run the relevant fix if the detect query returns any result.
 
-Nota: o problema relacionado aos pontos 1,3,4,5,7a e 7b será corrigido após o upgrade do banco de dados para o SAP Business One 9.3 PL 10, verifique a nota SAP  2727525 – Correções automáticas para upgrade de UDT/problemas relacionados ao UDF para obter mais detalhes.
+Note: Issue related to point 1,3,4,5,7a and 7b will be fixed after upgrading the database to SAP Business One 9.3 PL 10, check the SAP Note  2727525 - Auto-fixes for Upgrade UDT / UDF Related Issues for more detail.
 
-Nota: o problema relacionado ao ponto 9 será corrigido após o upgrade do banco de dados para o SAP Business One 9.3 PL 09, verifique a nota SAP 2732587 - Verificação prévia de erros do assistente de upgrade: detectar valor definido pelo usuário vinculado a uma tabela sem um nome 
+Note: Issue related to point 9 will be fixed after upgrading the database to SAP Business one 9.3 PL 09, check the SAP Note 2732587 - Upgrade Wizard Error Precheck: Detect User Defined Value Linked to a Table Without a Name 
