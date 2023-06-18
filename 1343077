@@ -1,0 +1,397 @@
+CREATE PROCEDURE "1343077_DETECT"()
+LANGUAGE sqlscript AS 
+	isExist INTEGER;
+	outb nvarchar(50);
+	outb2 nvarchar(50);
+	utbt INTEGER;
+	cnt INTEGER;
+	cols INTEGER;
+	query nvarchar(2000);
+	
+	CURSOR outb_cursor FOR 
+		SELECT '"@'||"TableName" ||'"', '''@'||"TableName" ||'''', "ObjectType" FROM "OUTB";
+	
+BEGIN
+
+SELECT COUNT(1) INTO isExist FROM SYS.TABLES WHERE "SCHEMA_NAME" = CURRENT_SCHEMA AND "TABLE_NAME" LIKE '1343077_COLS_COUNT';
+	IF :isExist <> 0 THEN
+		DROP TABLE "1343077_COLS_COUNT";
+	END IF;
+	
+CREATE COLUMN TABLE "1343077_COLS_COUNT" ("COLS_COUNT" INTEGER);
+INSERT INTO "1343077_COLS_COUNT" VALUES (0);
+
+SELECT COUNT(1) INTO isExist FROM SYS.TABLES WHERE "SCHEMA_NAME" = CURRENT_SCHEMA AND "TABLE_NAME" LIKE '1343077_ROW_COUNT';
+	IF :isExist <> 0 THEN
+		DROP TABLE "1343077_ROW_COUNT";
+	END IF;
+	
+CREATE COLUMN TABLE "1343077_ROW_COUNT" ("ROW_COUNT" INTEGER);
+INSERT INTO "1343077_ROW_COUNT" VALUES (0);
+
+SELECT COUNT(1) INTO isExist FROM SYS.TABLES WHERE "SCHEMA_NAME" = CURRENT_SCHEMA AND "TABLE_NAME" LIKE '1343077_RESULTS';
+	IF :isExist <> 0 THEN
+		DROP TABLE "1343077_RESULTS";
+	END IF;
+	
+CREATE COLUMN TABLE "1343077_RESULTS" ("RESULTS" nvarchar(61));
+
+OPEN outb_cursor;
+FETCH outb_cursor INTO outb, outb2, utbt;
+WHILE NOT outb_cursor::NOTFOUND DO
+
+IF :utbt = 0 -- No Object
+	THEN		
+		query:='UPDATE "1343077_COLS_COUNT" SET "COLS_COUNT" = 
+				(SELECT COUNT(T0."TABLE_NAME")
+				FROM "PUBLIC"."TABLE_COLUMNS" T0 
+				INNER JOIN "PUBLIC"."TABLES" T1
+				ON T0."TABLE_OID" = T1."TABLE_OID"
+				WHERE T1."TABLE_NAME" = '||:outb2||' 
+				AND ( T0."COLUMN_NAME" = ''Code'' OR T0."COLUMN_NAME" = ''Name'' )
+				AND T0."SCHEMA_NAME" = (SELECT CURRENT_SCHEMA FROM DUMMY))';					
+		EXEC(:query);					
+		SELECT IFNULL("COLS_COUNT",0) INTO cols FROM "1343077_COLS_COUNT";	
+
+			IF :cols = 2 
+			THEN
+			--Code duplicate 			
+				query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" =		
+						(SELECT COUNT(CAST("Code" AS nvarchar(50))) FROM '||:outb||' 
+						 GROUP BY CAST("Code" AS nvarchar(50)) 
+						 HAVING COUNT(CAST("Code" AS nvarchar(50))) >1)';			
+				EXEC(:query);
+				SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";
+				
+				IF :cnt > 0
+				THEN
+					query:='INSERT INTO "1343077_RESULTS"				
+							SELECT CAST("Code" AS nvarchar(50)) AS '||:outb||' FROM '||:outb||' 
+							GROUP BY CAST("Code" AS nvarchar(50)) 
+							HAVING COUNT(CAST("Code" AS nvarchar(50)))>1';	
+					EXEC(:query);
+					SELECT "RESULTS" FROM "1343077_RESULTS";
+					SELECT ''||:outb||' : duplicate in CODE field' AS "RESULT" FROM DUMMY;
+					cnt := 0;
+					DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+				END IF;
+
+			--Code NULL	
+				query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" =
+						(SELECT COUNT(*) FROM '||:outb||' WHERE "Code" IS NULL)';
+				EXEC(:query);
+				SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";
+				
+				IF :cnt > 0
+				THEN
+					query:='INSERT INTO "1343077_RESULTS"				
+							SELECT CAST("Code" AS nvarchar(50)) AS '||:outb||' FROM '||:outb||' WHERE "Code" IS NULL';
+					EXEC(:query);
+					SELECT "RESULTS" FROM "1343077_RESULTS";
+					SELECT ''||:outb||' : NULL Value in CODE field' AS "RESULT" FROM DUMMY;
+					cnt := 0;
+					DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+				END IF;
+
+			--Name duplicate
+				query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" =
+						(SELECT COUNT(CAST("Name" as nvarchar(100))) FROM '||:outb||'
+						 GROUP BY CAST("Name" as nvarchar(100))
+						 HAVING COUNT(CAST("Name" as nvarchar(100)))>1)';
+				EXEC(:query);
+				SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";
+				
+				IF :cnt > 0
+				THEN
+					query:='INSERT INTO "1343077_RESULTS
+							SELECT CAST("Name" as nvarchar(100)) AS '||:outb||' FROM '||:outb||'
+							GROUP BY CAST("Name" as nvarchar(100))
+							HAVING COUNT(CAST("Name" as nvarchar(100))) >1';	 
+
+					SELECT "RESULTS" FROM "1343077_RESULTS";
+					SELECT ''||:outb||' : duplicate in NAME field' AS "RESULT" FROM DUMMY;
+					cnt := 0;
+					DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+				END IF;
+
+			--Name NULL
+				query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" =
+						(SELECT COUNT(*) FROM '||:outb||' WHERE "Name" IS NULL)';
+				EXEC(:query);
+				SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";
+				
+				IF :cnt > 0
+				THEN
+					query:='INSERT INTO "1343077_RESULTS
+							SELECT CAST("Name" as nvarchar(100)) AS '||:outb||' FROM '||:outb||' WHERE "Name" IS NULL';
+					SELECT "RESULTS" FROM "1343077_RESULTS";
+					SELECT ''||:outb||' : NULL Value in NAME field' AS "RESULT" FROM DUMMY;
+					cnt := 0;
+					DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+				END IF;	
+			
+		ELSE
+			SELECT 'Missing columns ("Code" or "Name") in table ' || :outb AS "RESULT" FROM DUMMY;
+		END IF;
+	END IF;
+
+IF :utbt = 1 -- Master Data
+	THEN
+		query:='UPDATE "1343077_COLS_COUNT" SET "COLS_COUNT" = 
+				(SELECT COUNT(T0."TABLE_NAME") 
+				FROM "PUBLIC"."TABLE_COLUMNS" T0 
+				INNER JOIN "PUBLIC"."TABLES" T1
+				ON T0."TABLE_OID" = T1."TABLE_OID"
+				WHERE T1."TABLE_NAME" = '||:outb2||' 
+				AND ( T0."COLUMN_NAME" = ''Code'' OR T0."COLUMN_NAME" = ''DocEntry'' )
+				AND T0."SCHEMA_NAME" = (SELECT CURRENT_SCHEMA FROM DUMMY))';	
+		EXEC(:query);					
+		SELECT IFNULL("COLS_COUNT",0) INTO cols FROM "1343077_COLS_COUNT";	
+		
+		IF :cols = 2
+		THEN
+		
+		--Code duplicate
+		query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+				(SELECT COUNT(CAST("Code" AS nvarchar(50))) FROM '||:outb||'
+				GROUP BY CAST("Code" AS nvarchar(50)) 
+				HAVING COUNT(CAST("Code" AS nvarchar(50))) >1)';
+		EXEC(:query);					
+		SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";	
+		
+		IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"
+						SELECT CAST("Code" AS nvarchar(50)) AS '||:outb||' 
+						FROM '||:outb||' 
+						GROUP BY CAST("Code" AS nvarchar(50)) 
+						HAVING COUNT(CAST("Code" AS nvarchar(50))) >1';
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";
+				SELECT ''||:outb||' : duplicate in CODE field' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+			END IF;
+		
+		--Code NULL
+		query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+				(SELECT COUNT(*) FROM '||:outb||' WHERE "Code" IS NULL)';
+		EXEC(:query);					
+		SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";	
+		
+		IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"	
+						SELECT CAST("Code" AS nvarchar(50)) AS '||:outb||' 
+						FROM '||:outb||'  
+						WHERE "Code" IS NULL';
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";
+				SELECT ''||:outb||' : NULL Value in CODE field' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+		END IF;
+		
+		--DocEntry duplicate		
+		query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+				(SELECT COUNT(CAST("DocEntry" as nvarchar(30))) AS '||:outb||' 
+				 FROM '||:outb||' 
+				 GROUP BY CAST("DocEntry" as nvarchar(30)) 
+				 HAVING COUNT(CAST("DocEntry" as nvarchar(30))) >1)';
+		EXEC(:query);					
+		SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";	
+		
+		IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"	
+						SELECT CAST("DocEntry" as nvarchar(30)) AS '||:outb||' 
+						FROM '||:outb||' 
+						GROUP BY CAST("DocEntry" as nvarchar(30)) 
+						HAVING COUNT(CAST("DocEntry" as nvarchar(30))) >1';
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";
+				SELECT ''||:outb||' : duplicate in DocEntry field' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+		END IF;
+
+		--DocEntry NULL
+		query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+				(SELECT COUNT(*) FROM '||:outb||' WHERE "DocEntry" IS NULL)';
+		EXEC(:query);					
+		SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";	
+		
+		IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"
+						SELECT CAST("DocEntry" as nvarchar(30)) AS '||:outb||' 
+						FROM '||:outb||' WHERE "DocEntry" IS NULL';
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";
+				SELECT ''||:outb||' : NULL Value in DocEntry field' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+		END IF;
+
+		ELSE
+			SELECT 'Missing columns ("Code" or "DocEntry") in table ' || :outb AS "RESULT" FROM DUMMY;
+			END IF;
+	END IF;
+
+IF :utbt = 2 -- Master Data Rows
+	THEN
+		query:='UPDATE "1343077_COLS_COUNT" SET "COLS_COUNT" = 
+				(SELECT COUNT(T0."TABLE_NAME")
+				FROM "PUBLIC"."TABLE_COLUMNS" T0 
+				INNER JOIN "PUBLIC"."TABLES" T1
+				ON T0."TABLE_OID" = T1."TABLE_OID"
+				WHERE T1."TABLE_NAME" = '||:outb2||' 
+				AND ( T0."COLUMN_NAME" = ''Code'' OR T0."COLUMN_NAME" = ''LineId'' )
+				AND T0."SCHEMA_NAME" = (SELECT CURRENT_SCHEMA FROM DUMMY))';	
+		EXEC(:query);					
+		SELECT IFNULL("COLS_COUNT",0) INTO cols FROM "1343077_COLS_COUNT";							
+		
+		IF :cols = 2
+		THEN		
+			query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+						(SELECT COUNT(CAST("Code" AS nvarchar(50)) ||''_'' || CAST("LineId" as nvarchar(30)))
+						FROM '||:outb||'  
+						GROUP BY CAST("Code" AS nvarchar(50))||''_''|| CAST("LineId" AS nvarchar(30))
+						HAVING COUNT(CAST("Code" as nvarchar(50))||''_''|| CAST("LineId" AS nvarchar(30))) > 1)';
+
+			EXEC(:query);
+			SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";			
+			IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"
+						SELECT CAST("Code" AS nvarchar(50)) ||''_''|| CAST("LineId" AS nvarchar(30)) AS '||:outb||' 
+						FROM '||:outb||'
+						GROUP BY CAST("Code" AS nvarchar(50))  ||''_''|| CAST("LineId" AS nvarchar(30)) 
+						HAVING COUNT(CAST("Code" AS nvarchar(50)) ||''_''|| CAST("LineId" AS nvarchar(30))) >1';
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";	
+				SELECT ''||:outb||' : identity violation' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+			END IF;
+		
+		ELSE
+			SELECT 'Missing columns ("Code" or "LineId") in table ' || :outb AS "RESULT" FROM DUMMY;
+		END IF;
+	END IF;
+	
+IF :utbt = 3  -- Document
+	THEN
+		query:='UPDATE "1343077_COLS_COUNT" SET "COLS_COUNT" = 
+				(SELECT COUNT(T0."TABLE_NAME")
+				FROM "PUBLIC"."TABLE_COLUMNS" T0 
+				INNER JOIN "PUBLIC"."TABLES" T1
+				ON T0."TABLE_OID" = T1."TABLE_OID"
+				WHERE T1."TABLE_NAME" = '||:outb2||' 
+				AND T0."COLUMN_NAME" = ''DocEntry''
+				AND T0."SCHEMA_NAME" = (SELECT CURRENT_SCHEMA FROM DUMMY))';	
+		EXEC(:query);					
+		SELECT IFNULL("COLS_COUNT",0) INTO cols FROM "1343077_COLS_COUNT";			
+		
+		IF :cols = 1
+		THEN
+			query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+						(SELECT COUNT(CAST("DocEntry" AS nvarchar(30)))
+						FROM '||:outb||'  
+						GROUP BY CAST("DocEntry" AS nvarchar(30))
+						HAVING COUNT(CAST("DocEntry" as nvarchar(30))) > 1)';
+					
+			EXEC(:query);
+			SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";	
+			IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"
+						SELECT CAST("DocEntry" AS nvarchar(30)) AS '||:outb||' 
+						FROM '||:outb||' 
+						GROUP BY CAST("DocEntry" AS nvarchar(30)) 
+						HAVING COUNT(CAST("DocEntry" AS nvarchar(30))) >1';
+				
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";	
+				SELECT ''||:outb||' : identity violation' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+			END IF;
+		ELSE
+			SELECT 'Missing columns (DocEntry) in table ' || :outb AS "RESULT" FROM DUMMY;
+		END IF;
+	END IF;	
+	
+IF :utbt = 4 -- Document Lines
+	THEN		
+		query:='UPDATE "1343077_COLS_COUNT" SET "COLS_COUNT" = 
+				(SELECT COUNT(T0."TABLE_NAME")
+				FROM "PUBLIC"."TABLE_COLUMNS" T0 
+				INNER JOIN "PUBLIC"."TABLES" T1
+				ON T0."TABLE_OID" = T1."TABLE_OID"
+				WHERE T1."TABLE_NAME" = '||:outb2||' 
+				AND ( T0."COLUMN_NAME" = ''DocEntry'' OR T0."COLUMN_NAME" = ''LineId'' )
+				AND T0."SCHEMA_NAME" = (SELECT CURRENT_SCHEMA FROM DUMMY))';	
+		EXEC(:query);					
+		SELECT IFNULL("COLS_COUNT",0) INTO cols FROM "1343077_COLS_COUNT";							
+		
+		IF :cols = 2
+		THEN	
+			query:='UPDATE "1343077_ROW_COUNT" SET "ROW_COUNT" = 
+						(SELECT COUNT(CAST("DocEntry" AS nvarchar(30)) ||''_'' || CAST("LineId" as nvarchar(30)))
+						FROM '||:outb||'  
+						GROUP BY CAST("DocEntry" AS nvarchar(30))||''_''|| CAST("LineId" AS nvarchar(30))
+						HAVING COUNT(CAST("DocEntry" as nvarchar(30))||''_''|| CAST("LineId" AS nvarchar(30))) > 1)';
+								
+			EXEC(:query);
+			SELECT IFNULL("ROW_COUNT",0) INTO cnt FROM "1343077_ROW_COUNT";	
+			IF :cnt > 0
+			THEN
+				query:='INSERT INTO "1343077_RESULTS"
+						SELECT CAST("DocEntry" AS nvarchar(30)) ||''_''|| CAST("LineId" AS nvarchar(30)) AS '||:outb||'
+						FROM '||:outb||' 
+						GROUP BY CAST("DocEntry" AS nvarchar(30)) ||''_''|| CAST("LineId" AS nvarchar(30)) 
+						HAVING COUNT(CAST("DocEntry" AS nvarchar(30)) ||''_''|| CAST("LineId" AS nvarchar(30))) >1';
+				
+				EXEC(:query);
+				SELECT "RESULTS" FROM "1343077_RESULTS";
+				SELECT ''||:outb||' : identity violation' AS "RESULT" FROM DUMMY;
+				cnt := 0;
+				DELETE FROM "1343077_RESULTS" WHERE 1 = 1;
+			END IF;
+		ELSE
+			SELECT 'Missing columns ("DocEntry" or "LineId" in table ' || :outb AS "RESULT" FROM DUMMY;
+		END IF;
+	END IF;
+
+DELETE FROM "1343077_COLS_COUNT";
+INSERT INTO "1343077_COLS_COUNT" VALUES (0);
+		
+DELETE FROM "1343077_ROW_COUNT";
+INSERT INTO "1343077_ROW_COUNT" VALUES (0);
+
+DELETE FROM "1343077_RESULTS";
+
+FETCH outb_cursor INTO outb, outb2, utbt;
+END WHILE;
+CLOSE outb_cursor;
+
+SELECT COUNT(1) INTO isExist FROM SYS.TABLES WHERE "SCHEMA_NAME" = CURRENT_SCHEMA AND "TABLE_NAME" LIKE '1343077_COLS_COUNT';
+	IF :isExist <> 0 THEN
+		DROP TABLE "1343077_COLS_COUNT";
+	END IF;
+
+SELECT COUNT(1) INTO isExist FROM SYS.TABLES WHERE "SCHEMA_NAME" = CURRENT_SCHEMA AND "TABLE_NAME" LIKE '1343077_ROW_COUNT';
+	IF :isExist <> 0 THEN
+		DROP TABLE "1343077_ROW_COUNT";
+	END IF;
+
+SELECT COUNT(1) INTO isExist FROM SYS.TABLES WHERE "SCHEMA_NAME" = CURRENT_SCHEMA AND "TABLE_NAME" LIKE '1343077_RESULTS';
+	IF :isExist <> 0 THEN
+		DROP TABLE "1343077_RESULTS";
+	END IF;
+
+END;
+
+CALL "1343077_DETECT";
+DROP PROCEDURE "1343077_DETECT";
