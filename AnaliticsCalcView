@@ -1,4 +1,5 @@
 https://blogs.sap.com/2014/06/08/authorization-of-user-privilege-on-sap-hana-modeler-development/
+https://answers.sap.com/questions/13072141/insufficient-privilege-detailed-info-for-this-erro.html
 
 GRANT SELECT ON SCHEMA SBODEMO TO _SYS_REPO WITH GRANT OPTION;
 
