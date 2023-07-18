@@ -13,7 +13,7 @@ https://www.pragmaticlinux.com/2020/07/how-to-copy-files-via-ssh/
 
 
 
-rsync -e "ssh" -avz * pragmalin@debianvm:/home/pragmalin
+rsync -e "ssh" -avz * user@host:/software/sapb1
 
 
 /usr/sap/HDB/HDB00/exe/sapcontrol -nr 00 -function StartSystem HDB
