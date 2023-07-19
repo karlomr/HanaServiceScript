@@ -1,0 +1,19 @@
+ Roles:
+o PUBLIC
+o CONTENT_ADMIN
+
+System Privileges:
+o CREATE SCHEMA (grantable)
+o USER ADMIN (grantable)
+o CATALOG READ (grantable)
+o IMPORT
+o EXPORT
+o BACKUP ADMIN
+o BACKUP OPERATOR
+
+SQL object privileges:
+o SBOCOMMON schema: SELECT, INSERT, DELETE, UPDATE, EXECUTE (all grantable)
+o COMMON schema: SELECT, INSERT, DELETE, UPDATE, EXECUTE (all grantable)
+o SYSTEM schema: CREATE ANY, SELECT
+o _SYS_STATISTICS schema: SELECT, EXECUTE
+o B1 Company schema: SELECT, INSERT, DELETE, UPDATE, EXECUTE (all grantable)
