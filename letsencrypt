@@ -4,4 +4,4 @@ https://certbot.eff.org/instructions?ws=other&os=windows
 
 https://www.ssl.com/pt/como/crie-um-arquivo-de-certificado-pfx-p12-usando-o-openssl/
 
-openssl pkcs12 -export -out certificado.pfx -inkey privateKey.key -in cert.pem -certfile chain.pem
+openssl pkcs12 -export -out certificado.pfx -inkey privkey.pem -in cert.pem -certfile chain.pem
