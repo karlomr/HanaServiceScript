@@ -10,6 +10,7 @@ https://help.sap.com/viewer/b3ee5778bc2e4a089d3299b82ec762a7/2.0.02/en-US/ddbdd6
 https://documentation.commvault.com/commvault/v11/article?p=22335.htm
 https://d.dam.sap.com/a/AEenAdR
 https://www.pragmaticlinux.com/2020/07/how-to-copy-files-via-ssh/
+https://www.hanatutorials.com/p/requirement-you-need-to-reset-system.html
 
 
 
@@ -28,7 +29,9 @@ select * from "SYS"."M_DATABASES"
 
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name "AllowInsecureGuestAuth" -Type DWord -Value 1
 
+--conect db by terminal
 
+hdbsql  -n localhost -i 00 -d SystemDB -u SYSTEM -p Ina123
 
 systemctl start sshd
 
