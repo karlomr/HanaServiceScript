@@ -1,0 +1,94 @@
+https://blogs.sap.com/2018/02/22/sap-business-one-version-for-sap-hana-linux-cheatsheet/
+
+General Linux Commands:
+ls – directory listing
+
+ls -al – formatted listing with hidden files
+
+cd dir – change directory to dir
+
+cd – change to home
+
+pwd – show current directory
+
+mkdir dir – create a directory dir
+
+rm file – delete file
+
+rm -r dir – delete directory dir
+
+rm -f file – force remove file
+
+rm –rf dir – force remove directory dir *
+
+cp file1 file2 – copy file1 to file2
+
+cp -r dir1 dir2 – copy dir1 to dir2; create dir2 if it doesn’t exist
+
+mv file1 file2 – rename or move file1 to file2 if file2 is an existing directory, moves file1 intodirectory file2
+
+ps -ef – display all active processes (use |grep <string>) to list only the processes containing <string>
+
+top – display all running processes
+
+kill pid – kill process id pid;, use kill -9 to force the kill
+
+killall proc – kill all processes named proc *
+
+chmod octal file – change the permissions of file to octal, which can be found separately for user, group, and world by adding:
+
+4 – read (r)
+2 – write (w)
+1 – execute (x)
+Examples:
+
+chmod 777 – read, write, execute for all
+
+chmod 755 – rwx for owner, rx for group and world
+
+date – show the current date and time
+
+cal – show this month’s calendar
+
+uptime – show current uptime
+
+w – display who is online
+
+whoami – who you are logged in as
+
+cat /proc/cpuinfo – cpu information
+
+cat /proc/meminfo – memory information
+
+man command – show the manual for command
+
+df -h – show disk usage (-h for ‘human readable)
+
+du -h – show directory space usage
+
+free – show memory and swap usage, use -m or -g for Megabytes or Gigabytes to make it readable
+
+ 
+
+SAP Business One, version for SAP HANA related commands:
+cat /etc/SuSE-release – returns OS version
+
+./install – start installation (always use ./)
+
+su – <sid>adm – change to user <sid>adm in home directory
+
+./HDB <start/stop/restart> – Start/stop/restart HANA instance from console
+
+cd /etc/init.d – directory to start/stop/restart B1 services
+
+./sapb1servertools <start/stop/restart> – Start/stop/restart B1 servertools
+
+./b1s <start/stop/restart> – Start/stop/restart Service Layer
+
+ps –ef | grep java – display current active processes from B1 Servertools
+
+ps –ef | grep hdb – display current active processes from SAP HANA
+
+rpm –q – a | grep B1 – lists installed B1 components
+
+rpm –q –a | grep B1 | xargs rpm –e – removes B1 components (only use after uninstall failed)
