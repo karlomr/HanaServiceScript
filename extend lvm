@@ -3,6 +3,6 @@ https://somosagility.com.br/como-redimensionar-uma-lvm-no-linux/
 https://serverfault.com/questions/972385/xfs-growfs-is-not-a-mounted-xfs-filesystem-when-trying-to-grow-ol-root
 
 
-lvextend --resizefs −L +100G /dev/vg_hana/hana_data
+lvextend −L +100G /dev/vg_hana/hana_data
 
 xfs_growfs /hana/data
